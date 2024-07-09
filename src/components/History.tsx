@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useToast } from "./ui/use-toast";
+import tonviewerSvg from "/tonviewer.svg";
 
 const sampleAddress = `0:0000000000000000000000000000000000000000000000000000000000000000`;
 
@@ -60,7 +61,7 @@ export default function History() {
             </div>
             <a href={`https://tonviewer.com/${sampleAddress}`} target="_blank">
               <Avatar className="h-10 w-10 p-2 bg-foreground/5 hover:bg-foreground/10">
-                <AvatarImage src="/tonviewer.svg" />
+                <AvatarImage src={tonviewerSvg} />
                 <AvatarFallback>TV</AvatarFallback>
               </Avatar>
             </a>
