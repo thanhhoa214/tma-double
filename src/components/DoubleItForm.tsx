@@ -31,7 +31,7 @@ export default function DoubleItForm() {
   };
 
   return (
-    <Card className="bg-orange-950/5 py-8">
+    <Card className="bg-orange-950/5 py-2 md:py-4">
       <form onSubmit={onSubmit} className="space-y-5 p-5 text-center">
         <BicepsFlexed size={100} className="inline-block" />
         <p>Double this amount, send to my account 🚀</p>
