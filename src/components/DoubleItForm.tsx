@@ -20,7 +20,6 @@ export default function DoubleItForm() {
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    console.log(amount);
     const nanoTon = amount * oneTon;
     const response = await tonConnectUi.sendTransaction({
       validUntil: Math.floor(Date.now() / 1000) + 600,
@@ -51,6 +50,7 @@ export default function DoubleItForm() {
               variant="outline"
               type="button"
               onClick={() => setAmount(number)}
+              className="p-2 h-8 min-w-8 md:h-10 md:p-3"
             >
               {number}
             </Button>

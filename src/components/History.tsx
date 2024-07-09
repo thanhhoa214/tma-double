@@ -25,13 +25,13 @@ export default function History() {
           <li className="w-full flex items-center space-x-4">
             <Avatar>
               <AvatarFallback className="text-2xl">
-                {walletAddressToEmoji(sampleAddress)}
+                {walletAddressToEmoji("sampleAddress")}
               </AvatarFallback>
             </Avatar>
             <div className="w-full flex flex-col justify-center text-sm">
               <p className="-ml-1">
                 <code
-                  className="font-sans font-semibold hover:bg-foreground/10 active:bg-foreground/20 px-2 py-1 rounded-md group cursor-pointer"
+                  className="font-sans font-semibold hover:bg-foreground/10 active:bg-foreground/20 px-2 py-1 rounded-md group cursor-pointer hover:mr-1"
                   onClick={() => {
                     copyToClipboard(sampleAddress);
                     toast({
@@ -52,9 +52,9 @@ export default function History() {
                     size={12}
                     className="ml-2 mb-1 hidden group-hover:inline-block"
                   />
-                </code>{" "}
-                <span className="text-red-300">lost</span>{" "}
-                <strong>{2.0} TON</strong>
+                </code>
+                <span className="text-green-500">won</span>{" "}
+                <strong>{5.0} TON</strong>
               </p>
               <p className="text-foreground/50">Yesterday, 21-01-2024</p>
             </div>
@@ -68,15 +68,35 @@ export default function History() {
           <li className="w-full flex items-center space-x-4">
             <Avatar>
               <AvatarFallback className="text-2xl">
-                {walletAddressToEmoji("asdsd")}
+                {walletAddressToEmoji(sampleAddress)}
               </AvatarFallback>
             </Avatar>
             <div className="w-full flex flex-col justify-center text-sm">
               <p className="-ml-1">
-                <code className="font-sans font-semibold bg-foreground/10 px-2 py-0.5 rounded-md">
+                <code
+                  className="font-sans font-semibold hover:bg-foreground/10 active:bg-foreground/20 px-2 py-1 rounded-md group cursor-pointer hover:mr-1"
+                  onClick={() => {
+                    copyToClipboard(sampleAddress);
+                    toast({
+                      description: (
+                        <p>
+                          <CheckCircle
+                            size={18}
+                            className="inline-block mr-1"
+                          />{" "}
+                          Address was copied to clipboard
+                        </p>
+                      ),
+                    });
+                  }}
+                >
                   {shortenAddress(toUserFriendlyAddress(sampleAddress))}
-                </code>{" "}
-                <span className="text-green-500">won</span>{" "}
+                  <Copy
+                    size={12}
+                    className="ml-2 mb-1 hidden group-hover:inline-block"
+                  />
+                </code>
+                <span className="text-red-300">lost</span>{" "}
                 <strong>{2.0} TON</strong>
               </p>
               <p className="text-foreground/50">Yesterday, 21-01-2024</p>

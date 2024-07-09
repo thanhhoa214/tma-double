@@ -9,7 +9,7 @@ function App() {
       manifestUrl="https://thanhhoa214.github.io/tma-double/tonconnect-manifest.json"
       uiPreferences={{ theme: THEME.DARK }}
     >
-      <main className="max-w-md mx-auto h-svh flex flex-col justify-center items-center gap-4 px-4">
+      <main className="max-w-md mx-auto min-h-svh flex flex-col justify-center items-center gap-4 px-4">
         <DoubleItForm />
         <History />
       </main>
