@@ -20,6 +20,7 @@ export default function DoubleItForm() {
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
+    if (!wallet) return;
     const nanoTon = amount * oneTon;
     const response = await tonConnectUi.sendTransaction({
       validUntil: Math.floor(Date.now() / 1000) + 600,
@@ -32,13 +33,13 @@ export default function DoubleItForm() {
   return (
     <Card className="bg-orange-950/5 py-2 md:py-4">
       <form onSubmit={onSubmit} className="space-y-5 p-5 text-center">
-        <BicepsFlexed size={100} className="inline-block" />
-        <p>Double this amount, send to my account 🚀</p>
+        <BicepsFlexed size={60} className="inline-block" />
+        <p>Double this, send to my account 🚀</p>
         <Input
           placeholder="0.0"
           type="number"
           min={0}
-          step={1.0}
+          step={0.01}
           value={amount}
           onChange={(e) => setAmount(Math.max(+e.target.value || 0, 0))}
           className="text-center"
