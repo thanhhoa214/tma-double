@@ -89,7 +89,7 @@ export function HistoryItem({
           {walletAddressToEmoji(sentFrom)}
         </AvatarFallback>
       </Avatar>
-      <div className="w-full flex flex-col justify-center text-sm">
+      <div className="w-full flex flex-col justify-center text-xs">
         <p className="-ml-1">
           <code
             className="font-sans font-semibold hover:bg-foreground/10 active:bg-foreground/20 px-2 py-1 rounded-md group cursor-pointer hover:mr-1"
@@ -108,7 +108,7 @@ export function HistoryItem({
             {shortenAddress(sentFrom)}
             <Copy
               size={12}
-              className="ml-2 mb-1 hidden group-hover:inline-block"
+              className="ml-1 mb-0.5 hidden group-hover:inline-block text-foreground"
             />
           </code>
           {wonAmount > 0 ? (

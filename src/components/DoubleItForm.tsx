@@ -60,7 +60,7 @@ export default function DoubleItForm() {
             </Button>
           ))}
         </ul>
-        <div className="*:w-4/5 *:font-semibold *:h-12 *:bg-gradient-to-br *:from-orange-500 *:to-orange-800 *:text-xl">
+        <div className="*:w-4/5 *:font-semibold *:h-12 *:bg-gradient-to-br *:from-orange-500 *:to-orange-800 *:text-lg">
           {wallet ? (
             <Button className="biorhyme-semibold">Shake</Button>
           ) : (
