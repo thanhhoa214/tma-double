@@ -20,8 +20,6 @@ import tonviewerSvg from "/tonviewer.svg";
 
 export default function History() {
   const wallet = useTonWallet();
-  const shortFriendlyAddress =
-    wallet && shortenAddress(toUserFriendlyAddress(wallet.account.address));
   const { txs } = useTransactions(DOUBLEIT_CONTRACT_ADDRESS);
   const [selectedTab, setSelectedTab] = useState<"all" | "mine">("all");
 
@@ -31,14 +29,14 @@ export default function History() {
         <TabsTrigger value="all" onClick={() => setSelectedTab("all")}>
           All bets
         </TabsTrigger>
-        {shortFriendlyAddress && (
+        {wallet && (
           <TabsTrigger value="mine" onClick={() => setSelectedTab("mine")}>
             My bets
           </TabsTrigger>
         )}
       </TabsList>
       <TabsContent value={selectedTab}>
-        <ul className="space-y-2 pt-4 pl-1 pr-3 max-h-64 overflow-auto">
+        <ul className="space-y-2 pt-4 pl-1 pr-2 max-h-64 overflow-auto">
           {txs
             ? txs.map((tx) => (
                 <HistoryItem
@@ -79,7 +77,7 @@ export function HistoryItem({
     wallet?.account.address
   );
   if (onlyMine && !isMyTx) return;
-  const sentFrom = toUserFriendlyAddress(transaction.in_msg.source);
+  const sentFrom = toUserFriendlyAddress(transaction.in_msg.source, true);
   const inValue = +transaction.in_msg.value;
   const outValue = +transaction.out_msgs[0]?.value || 0;
   const wonAmount = outValue - inValue;
@@ -125,10 +123,10 @@ export function HistoryItem({
         </p>
       </div>
       <a
-        href={`https://testnet.tonviewer.com/transaction/${transaction.hash}`}
+        href={`https://testnet.tonviewer.com/${transaction.hash}`}
         target="_blank"
       >
-        <Avatar className="h-10 w-10 p-2 bg-foreground/5 hover:bg-foreground/10">
+        <Avatar className="h-8 w-8 p-2 bg-foreground/5 hover:bg-foreground/10">
           <AvatarImage src={tonviewerSvg} />
           <AvatarFallback>TV</AvatarFallback>
         </Avatar>

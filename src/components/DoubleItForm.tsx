@@ -26,7 +26,7 @@ export default function DoubleItForm() {
       messages: [{ address: DOUBLEIT_CONTRACT_ADDRESS, amount: nanoTon + "" }],
     });
 
-    console.log(response);
+    console.log(response.boc);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 2000);
   };
