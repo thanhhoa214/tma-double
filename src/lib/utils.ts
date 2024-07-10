@@ -24,7 +24,7 @@ const hexToEmoji = [
   "🐔",
 ];
 export function walletAddressToEmoji(walletAddress: string) {
-  return hexToEmoji[walletAddress.charCodeAt(0) % 16];
+  return hexToEmoji[walletAddress.charCodeAt(walletAddress.length - 1) % 16];
 }
 
 export function shortenAddress(address: string) {
@@ -32,4 +32,9 @@ export function shortenAddress(address: string) {
   const firstPart = address.slice(0, 6);
   const lastPart = address.slice(-4);
   return `${firstPart}...${lastPart}`;
+}
+
+export function ignoreCaseEqual(a: string, b?: string) {
+  if (!b) return false;
+  return a.toLowerCase() === b.toLowerCase();
 }

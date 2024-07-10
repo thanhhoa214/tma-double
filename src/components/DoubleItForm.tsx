@@ -25,8 +25,10 @@ export default function DoubleItForm() {
       validUntil: Math.floor(Date.now() / 1000) + 600,
       messages: [{ address: DOUBLEIT_CONTRACT_ADDRESS, amount: nanoTon + "" }],
     });
+
     console.log(response);
     setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
   };
 
   return (

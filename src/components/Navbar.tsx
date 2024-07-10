@@ -6,11 +6,13 @@ export default function Navbar() {
 
   return (
     <nav className="w-full flex justify-between items-center">
-      <a href="/">
-        <BicepsFlexed size={20} className="inline-block text-orange-600" />
+      <a href="/" className="ml-4">
+        <BicepsFlexed size={28} className="inline-block text-orange-600" />
       </a>
 
-      {wallet && <TonConnectButton />}
+      {wallet && (
+        <TonConnectButton className="border rounded-xl border-orange-400 overflow-hidden scale-75" />
+      )}
     </nav>
   );
 }

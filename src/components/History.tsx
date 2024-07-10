@@ -6,7 +6,12 @@ import { useCopyToClipboard } from "usehooks-ts";
 import { ONE_TON } from "../constants";
 import { DOUBLEIT_CONTRACT_ADDRESS } from "../environment";
 import { Transaction, useTransactions } from "../hooks/useTransactions";
-import { shortenAddress, walletAddressToEmoji } from "../lib/utils";
+import { roundTo } from "../lib/round-to";
+import {
+  ignoreCaseEqual,
+  shortenAddress,
+  walletAddressToEmoji,
+} from "../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -33,7 +38,7 @@ export default function History() {
         )}
       </TabsList>
       <TabsContent value={selectedTab}>
-        <ul className="space-y-2 mt-4 pl-1 pr-3 max-h-64 overflow-auto">
+        <ul className="space-y-2 pt-4 pl-1 pr-3 max-h-64 overflow-auto">
           {txs
             ? txs.map((tx) => (
                 <HistoryItem
@@ -69,8 +74,12 @@ export function HistoryItem({
   const [, copyToClipboard] = useCopyToClipboard();
   const { toast } = useToast();
 
-  if (onlyMine && transaction.account !== wallet?.account.address) return;
-
+  const isMyTx = ignoreCaseEqual(
+    transaction.in_msg.source,
+    wallet?.account.address
+  );
+  if (onlyMine && !isMyTx) return;
+  const sentFrom = toUserFriendlyAddress(transaction.in_msg.source);
   const inValue = +transaction.in_msg.value;
   const outValue = +transaction.out_msgs[0]?.value || 0;
   const wonAmount = outValue - inValue;
@@ -79,7 +88,7 @@ export function HistoryItem({
     <li className="w-full flex items-center space-x-4">
       <Avatar>
         <AvatarFallback className="text-2xl">
-          {walletAddressToEmoji(transaction.account)}
+          {walletAddressToEmoji(sentFrom)}
         </AvatarFallback>
       </Avatar>
       <div className="w-full flex flex-col justify-center text-sm">
@@ -87,7 +96,7 @@ export function HistoryItem({
           <code
             className="font-sans font-semibold hover:bg-foreground/10 active:bg-foreground/20 px-2 py-1 rounded-md group cursor-pointer hover:mr-1"
             onClick={() => {
-              copyToClipboard(transaction.account);
+              copyToClipboard(sentFrom);
               toast({
                 description: (
                   <p>
@@ -98,7 +107,7 @@ export function HistoryItem({
               });
             }}
           >
-            {shortenAddress(toUserFriendlyAddress(transaction.account))}
+            {shortenAddress(sentFrom)}
             <Copy
               size={12}
               className="ml-2 mb-1 hidden group-hover:inline-block"
@@ -109,7 +118,7 @@ export function HistoryItem({
           ) : (
             <span className="text-red-400">lost</span>
           )}{" "}
-          <strong>{Math.abs(wonAmount) / ONE_TON} TON</strong>
+          <strong>{roundTo(Math.abs(wonAmount) / ONE_TON)} TON</strong>
         </p>
         <p className="text-foreground/50">
           <ReactTimeago date={transaction.now * 1000} />
