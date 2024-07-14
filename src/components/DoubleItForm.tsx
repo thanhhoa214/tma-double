@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { beginCell, Builder } from "@ton/ton";
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { BicepsFlexed, Loader2, Wallet } from "lucide-react";
@@ -5,12 +6,13 @@ import { FormEventHandler, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import TonWeb from "tonweb";
 import { useWindowSize } from "usehooks-ts";
-import { ONE_TON } from "../constants";
 import { DOUBLEIT_CONTRACT_ADDRESS } from "../environment";
-import { getApiClient } from "../lib/toncenter";
+import { fetchTransactions } from "../hooks/useTransactions";
+import { getBetResult } from "../lib/utils";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
+import { useToast } from "./ui/use-toast";
 
 function storeDoubleIt() {
   return (builder: Builder) => {
@@ -24,51 +26,77 @@ export default function DoubleItForm() {
   const predefinedNumbers = [0.5, 1, 5, 10, 50, 100];
   const [amount, setAmount] = useState(1);
   const { width, height } = useWindowSize();
+  const { toast } = useToast();
   const wallet = useTonWallet();
   const [tonConnectUi] = useTonConnectUI();
   const [showConfetti, setShowConfetti] = useState(false);
   const [latestHash, setLatestHash] = useState<string>();
+  const txsQuery = useQuery({
+    queryKey: ["transactions", DOUBLEIT_CONTRACT_ADDRESS],
+    queryFn: () => fetchTransactions(DOUBLEIT_CONTRACT_ADDRESS),
+  });
 
   useEffect(() => {
     if (!latestHash) return;
 
     const interval = setInterval(async () => {
       if (!wallet) return;
-      const client = await getApiClient();
-      const response = await client.get_transactions_api_v3_transactions_get({
-        account: [wallet.account.address],
-      });
-      if (
-        response.data.transactions.find((tx) => tx.in_msg?.hash === latestHash)
-      ) {
+      const response = await fetchTransactions(wallet.account.address);
+      const tx = response.transactions.find(
+        (tx) => tx.in_msg?.hash === latestHash
+      );
+      if (tx) {
+        const outMsgHash = tx.out_msgs[0]?.hash;
         clearInterval(interval);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 2000);
+        console.log(outMsgHash);
+
+        const contractTxs = await fetchTransactions(DOUBLEIT_CONTRACT_ADDRESS);
+        const contractTx = contractTxs?.transactions.find(
+          (tx) => tx.in_msg.hash === outMsgHash
+        );
         setLatestHash(undefined);
+        if (!contractTx) return;
+        const result = getBetResult(contractTx);
+        if (result > 0) {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        } else {
+          toast({
+            description: `😢 You lost ${Math.abs(
+              +TonWeb.utils.fromNano(`${result}`)
+            )} the bet`,
+            variant: "destructive",
+          });
+        }
       }
     }, 3000);
-  }, [wallet, latestHash]);
+  }, [wallet, latestHash, txsQuery, toast]);
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     if (!wallet) return;
-    const nanoTon = amount * ONE_TON;
+    if (latestHash) return;
+    const nanoTon = TonWeb.utils.toNano(amount);
     const body = beginCell().store(storeDoubleIt()).endCell();
 
-    const response = await tonConnectUi.sendTransaction({
-      validUntil: Math.floor(Date.now() / 1000) + 600,
-      messages: [
-        {
-          address: DOUBLEIT_CONTRACT_ADDRESS,
-          amount: nanoTon + "",
-          payload: body.toBoc().toString("base64"),
-        },
-      ],
-    });
+    try {
+      const response = await tonConnectUi.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [
+          {
+            address: DOUBLEIT_CONTRACT_ADDRESS,
+            amount: nanoTon + "",
+            payload: body.toBoc().toString("base64"),
+          },
+        ],
+      });
 
-    const msgBody = TonWeb.utils.base64ToBytes(response.boc);
-    const hash = await TonWeb.boc.Cell.fromBoc(msgBody)[0].hash();
-    setLatestHash(TonWeb.utils.bytesToBase64(hash));
+      const msgBody = TonWeb.utils.base64ToBytes(response.boc);
+      const hash = await TonWeb.boc.Cell.fromBoc(msgBody)[0].hash();
+      setLatestHash(TonWeb.utils.bytesToBase64(hash));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

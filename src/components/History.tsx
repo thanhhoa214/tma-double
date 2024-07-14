@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { toUserFriendlyAddress, useTonWallet } from "@tonconnect/ui-react";
 import { CheckCircle, Copy } from "lucide-react";
 import { useState } from "react";
@@ -5,14 +6,14 @@ import ReactTimeago from "react-timeago";
 import { useCopyToClipboard } from "usehooks-ts";
 import { ONE_TON } from "../constants";
 import { DOUBLEIT_CONTRACT_ADDRESS } from "../environment";
-import { useTransactions } from "../hooks/useTransactions";
+import { fetchTransactions, Transaction } from "../hooks/useTransactions";
 import { roundTo } from "../lib/round-to";
 import {
+  getBetResult,
   ignoreCaseEqual,
   shortenAddress,
   walletAddressToEmoji,
 } from "../lib/utils";
-import { Components } from "../toncenter";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -21,8 +22,11 @@ import tonviewerSvg from "/tonviewer.svg";
 
 export default function History() {
   const wallet = useTonWallet();
-  const { txs } = useTransactions(DOUBLEIT_CONTRACT_ADDRESS);
   const [selectedTab, setSelectedTab] = useState<"all" | "mine">("all");
+  const txsQuery = useQuery({
+    queryKey: ["transactions", DOUBLEIT_CONTRACT_ADDRESS],
+    queryFn: () => fetchTransactions(DOUBLEIT_CONTRACT_ADDRESS),
+  });
 
   return (
     <Tabs value={selectedTab} defaultValue="all" className="w-full">
@@ -38,8 +42,8 @@ export default function History() {
       </TabsList>
       <TabsContent value={selectedTab}>
         <ul className="space-y-2 pt-4 pl-1 pr-2 max-h-64 overflow-auto">
-          {txs
-            ? txs.transactions.map((tx) => (
+          {txsQuery.data
+            ? txsQuery.data.transactions.map((tx) => (
                 <HistoryItem
                   transaction={tx}
                   key={tx.hash}
@@ -66,7 +70,7 @@ export function HistoryItem({
   transaction,
   onlyMine = false,
 }: {
-  transaction: Components.Schemas.Transaction;
+  transaction: Transaction;
   onlyMine?: boolean;
 }) {
   const wallet = useTonWallet();
@@ -80,13 +84,7 @@ export function HistoryItem({
   const isMyTx = ignoreCaseEqual(inMsg.source, wallet.account.address);
   if (onlyMine && !isMyTx) return;
   const sentFrom = toUserFriendlyAddress(inMsg.source, true);
-  const inValue = inMsg.value ? +inMsg.value : 0;
-  const outValue = transaction.out_msgs[0]?.value
-    ? +transaction.out_msgs[0]?.value
-    : 0;
-  const wonAmount = outValue - inValue;
-
-  console.log(transaction.now);
+  const wonAmount = getBetResult(transaction);
 
   return (
     <li className="w-full flex items-center space-x-4">
