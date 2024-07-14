@@ -34,7 +34,6 @@ export function shortenAddress(address: string) {
   return `${firstPart}...${lastPart}`;
 }
 
-export function ignoreCaseEqual(a: string, b?: string) {
-  if (!b) return false;
+export function ignoreCaseEqual(a: string, b: string) {
   return a.toLowerCase() === b.toLowerCase();
 }

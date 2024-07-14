@@ -5,13 +5,14 @@ import ReactTimeago from "react-timeago";
 import { useCopyToClipboard } from "usehooks-ts";
 import { ONE_TON } from "../constants";
 import { DOUBLEIT_CONTRACT_ADDRESS } from "../environment";
-import { Transaction, useTransactions } from "../hooks/useTransactions";
+import { useTransactions } from "../hooks/useTransactions";
 import { roundTo } from "../lib/round-to";
 import {
   ignoreCaseEqual,
   shortenAddress,
   walletAddressToEmoji,
 } from "../lib/utils";
+import { Components } from "../toncenter";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -38,7 +39,7 @@ export default function History() {
       <TabsContent value={selectedTab}>
         <ul className="space-y-2 pt-4 pl-1 pr-2 max-h-64 overflow-auto">
           {txs
-            ? txs.map((tx) => (
+            ? txs.transactions.map((tx) => (
                 <HistoryItem
                   transaction={tx}
                   key={tx.hash}
@@ -65,22 +66,27 @@ export function HistoryItem({
   transaction,
   onlyMine = false,
 }: {
-  transaction: Transaction;
+  transaction: Components.Schemas.Transaction;
   onlyMine?: boolean;
 }) {
   const wallet = useTonWallet();
   const [, copyToClipboard] = useCopyToClipboard();
   const { toast } = useToast();
+  const inMsg = transaction.in_msg;
+  if (!inMsg) return null;
 
-  const isMyTx = ignoreCaseEqual(
-    transaction.in_msg.source,
-    wallet?.account.address
-  );
+  if (!inMsg.source || !wallet?.account.address) return null;
+
+  const isMyTx = ignoreCaseEqual(inMsg.source, wallet.account.address);
   if (onlyMine && !isMyTx) return;
-  const sentFrom = toUserFriendlyAddress(transaction.in_msg.source, true);
-  const inValue = +transaction.in_msg.value;
-  const outValue = +transaction.out_msgs[0]?.value || 0;
+  const sentFrom = toUserFriendlyAddress(inMsg.source, true);
+  const inValue = inMsg.value ? +inMsg.value : 0;
+  const outValue = transaction.out_msgs[0]?.value
+    ? +transaction.out_msgs[0]?.value
+    : 0;
   const wonAmount = outValue - inValue;
+
+  console.log(transaction.now);
 
   return (
     <li className="w-full flex items-center space-x-4">

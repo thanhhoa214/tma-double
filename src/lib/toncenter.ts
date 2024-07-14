@@ -1,14 +1,19 @@
-// import { Fetcher } from "openapi-typescript-fetch";
+import { OpenAPIClientAxios } from "openapi-client-axios";
+// import { TONCENTER_API_KEY } from "../environment";
+import type { Client } from "../toncenter.d";
 
-// import { paths } from "./toncenter.d";
+const api = new OpenAPIClientAxios({
+  definition: "https://testnet.toncenter.com/api/v3/openapi.json",
+  axiosConfigDefaults: {
+    baseURL: "https://testnet.toncenter.com",
+  },
+});
 
-// export const fetcher = Fetcher.for<paths>();
-// fetcher.configure({
-//   baseUrl: "https://petstore.swagger.io/v2",
-//   init: {
-//     headers: {
-//       "X-API-Key":
-//         "ff86055d6d17e498ebe373f9e3be78c544c3169a92d98642292db8006e1b3bc1",
-//     },
-//   },
-// });
+export const getApiClient = async () => {
+  const client = await api.getClient<Client>();
+
+  // add auth token
+  //   client.defaults.headers["authorization"] = `${TONCENTER_API_KEY}`;
+
+  return client;
+};
